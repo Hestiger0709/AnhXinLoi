@@ -1,63 +1,42 @@
-"use strict";
+// Đợi giao diện tải xong hoàn toàn
+document.addEventListener('DOMContentLoaded', () => {
+    // Tìm nút từ chối trong code gốc (nút màu đỏ nhỏ xíu)
+    // Tác giả gốc đặt tên thẻ chứa nút này là .btn-no hoặc #btn-no tùy phiên bản, 
+    // đoạn code dưới đây sẽ tự động quét và tìm đúng nút đó cho bạn.
+    const btnNo = document.querySelector('.btn-no') || document.querySelector('#btn-no') || document.querySelector('button:not(.btn-yes)');
+    
+    if (btnNo) {
+        // Bắt buộc ép nút sử dụng vị trí tuyệt đối để có thể tự do di chuyển khắp màn hình
+        btnNo.style.position = 'fixed';
+        btnNo.style.zIndex = '9999';
+        btnNo.style.transition = 'all 0.1s ease';
 
-const titleElement = document.querySelector(".title");
-const buttonsContainer = document.querySelector(".buttons");
-const yesButton = document.querySelector(".btn--yes");
-const noButton = document.querySelector(".btn--no");
-const catImg = document.querySelector(".cat-img");
+        // Hàm xử lý nhảy sang vị trí ngẫu nhiên
+        function moveButton() {
+            // Lấy kích thước màn hình điện thoại/máy tính hiện tại
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
 
-const MAX_IMAGES = 5;
+            // Tính toán tọa độ ngẫu nhiên sao cho nút không bị nhảy ra ngoài rìa màn hình
+            const randomX = Math.floor(Math.random() * (windowWidth - btnNo.offsetWidth - 20));
+            const randomY = Math.floor(Math.random() * (windowHeight - btnNo.offsetHeight - 20));
 
-let play = true;
-let noCount = 0;
+            // Cập nhật vị trí mới cho nút
+            btnNo.style.left = randomX + 'px';
+            btnNo.style.top = randomY + 'px';
+        }
 
-yesButton.addEventListener("click", handleYesClick);
+        // Khi di chuột vào (trên máy tính) -> nút nhảy liền
+        btnNo.addEventListener('mouseover', moveButton);
 
-noButton.addEventListener("click", function () {
-  if (play) {
-    noCount++;
-    const imageIndex = Math.min(noCount, MAX_IMAGES);
-    changeImage(imageIndex);
-    resizeYesButton();
-    updateNoButtonText();
-    if (noCount === MAX_IMAGES) {
-      play = false;
+        // Khi cố tình ấn/chạm vào (trên điện thoại) -> nút cũng nhảy liền và không kích hoạt lệnh bấm
+        btnNo.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            moveButton();
+        });
+        btnNo.addEventListener('click', function(e) {
+            e.preventDefault();
+            moveButton();
+        });
     }
-  }
 });
-
-function handleYesClick() {
-  titleElement.innerHTML = "Anh iu bé ,Anh hứa hongg làm bé buồn nữa đouuu :3";
-  buttonsContainer.classList.add("hidden");
-  changeImage("yes");
-}
-
-function resizeYesButton() {
-  const computedStyle = window.getComputedStyle(yesButton);
-  const fontSize = parseFloat(computedStyle.getPropertyValue("font-size"));
-  const newFontSize = fontSize * 1.6;
-
-  yesButton.style.fontSize = `${newFontSize}px`;
-}
-
-function generateMessage(noCount) {
-  const messages = [
-    "Không Bao Giờ",
-    "Anh bicc lỗi rồi ạa",
-    "Mong bé tha lỗi choo anhh :((",
-    "Anhh saii rồi , anhh đáng trách ạ",
-    "Bé đừng giận anhh nữa nhoo",
-    "Anhhh iu bé nhắm nhunnn đóoooo",
-  ];
-
-  const messageIndex = Math.min(noCount, messages.length - 1);
-  return messages[messageIndex];
-}
-
-function changeImage(image) {
-  catImg.src = `img/cat-${image}.jpg`;
-}
-
-function updateNoButtonText() {
-  noButton.innerHTML = generateMessage(noCount);
-}
